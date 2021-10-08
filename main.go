@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -15,7 +16,7 @@ import (
 )
 
 var client *mongo.Client
-
+var ctx context.Context
 type User struct {
 	id       string
 	Email    string
@@ -32,29 +33,17 @@ func CheckPasswordHash(password, hash string) bool {
 	return err == nil
 }
 
-// Setting Up MongoDB Connection
-func MongoInit() context.Context, *mongo.client{
-	  ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-
-}
-func init() {
-	//  defer cancel()
-	//     var err error
-	fmt.Println("HELLOOOOOO")
-	//  client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
-	//     if err != nil {
-	//         log.Fatal(err)
-	//     }
-}
-
-func addUser(w http.ResponseWriter, r *http.Request) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+ func init() {
+    var err error
+	ctx , cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	var err error
 	client, err = mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
 	if err != nil {
 		log.Fatal(err)
 	}
+ }
+
+func addUser(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	collection := client.Database("appointy").Collection("users")
 	u1 := User{
