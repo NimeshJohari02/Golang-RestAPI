@@ -18,7 +18,6 @@ type Users struct {
 	usrName		string
 	Email 		string
 	Password 	string
-	Posts		*[]string
 }
 
 func AddUser(w http.ResponseWriter, r *http.Request) {
@@ -48,7 +47,6 @@ w.Header().Set("Content-Type", "application/json")
 			"name": 	user.usrName,
 			"Email": 	user.Email,
 			"Password": hash, 
-			"Posts": 	user.Posts,
 		})
 		if (err!=nil) {
 			w.Header().Set("Content-Type", "application/json")
