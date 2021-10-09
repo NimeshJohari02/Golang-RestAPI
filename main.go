@@ -9,7 +9,6 @@ import (
 	_ "nimeshjohari02.com/restapi/user"
 )
 
-
 func main() {
 	err := http.ListenAndServe(":8080", nil) // set listen port
 	if err != nil {
