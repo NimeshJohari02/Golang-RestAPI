@@ -23,7 +23,6 @@ func TestFetchUser(t *testing.T) {
 		t.Errorf("handler returned wrong status code: got %v want %v",
 			status, http.StatusOK)
 	}
-
 	expected :=`{"Email":"\"nimeshjohari95@gmail.com\"","Password":"$2a$14$C0pdzLah2gIHdttH2kbiOOf55mwHgEdlewV1Jlt2nyK8E8Jo.PSga","Posts":null,"_id":"6161ad1923c42f4188930f8a","id":"7a62cbbc-7f70-48db-b740-7be5fef57328","name":"\"NJ\""}`
 	if rr.Body.String() != expected {
 		t.Errorf("handler returned unexpected body: got %v want %v",

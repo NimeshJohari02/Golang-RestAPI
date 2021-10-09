@@ -49,7 +49,8 @@ func AddUser(w http.ResponseWriter, r *http.Request) {
 			"Posts": 	user.Posts,
 		})
 		if (err!=nil) {
-			fmt.Fprintf(w, "Unable to insert database. \n%s", err)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
 		}
 
 		fmt.Fprintf(w, "Inserted a single user document: %v\n", result.InsertedID)

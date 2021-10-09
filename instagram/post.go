@@ -62,7 +62,6 @@ func AddInstaPost(w http.ResponseWriter, r *http.Request) {
 			res, err := AddPostUser(post.userID, post.fileName)
 			if (err != nil) {
 				fmt.Fprintf(w, "Error updating user db: %s\n", err)
-				panic(err)
 			}
 
 			conn := database.InitiateMongoClient()
