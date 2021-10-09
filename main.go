@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -13,6 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/crypto/bcrypt"
+	_ "nimeshjohari02.com/appointyapi/instagram"
 )
 
 var client *mongo.Client
@@ -85,26 +85,20 @@ func authentication(w http.ResponseWriter, r *http.Request) {
         fmt.Println("result Passwords " , result.Password)
         fmt.Println("User Passwords " , u1.Password)
 		value :=CheckPasswordHash(u1.Password, result.Password)
-        fmt.Println("value " , value)
+		if value {
+			fmt.Fprintf(w, "Login Successful")
+		}	
+		else
+		{
+			fmt.Fprintf(w, "Login Failed")
+		}
 	}
-}
-func sayhelloName(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
-	fmt.Println(r.Form)
-	fmt.Println("path", r.URL.Path)
-	fmt.Println("scheme", r.URL.Scheme)
-	fmt.Println(r.Form["url_long"])
-	for k, v := range r.Form {
-		fmt.Println("key:", k)
-		fmt.Println("val:", strings.Join(v, ""))
-	}
-	fmt.Fprintf(w, "Hello astaxie!")
 }
 
 func main() {
-	http.HandleFunc("/", sayhelloName) // set router
-	http.HandleFunc("/login", addUser)
-	http.HandleFunc("/auth", authentication)
+	go http.HandleFunc("/login", addUser)
+	go http.HandleFunc("/auth", authentication)
+	
 	err := http.ListenAndServe(":8080", nil) // set listen port
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
