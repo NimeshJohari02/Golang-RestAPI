@@ -17,6 +17,8 @@ import (
 
 var client *mongo.Client
 var ctx context.Context
+var UserCollection *mongo.Collection
+
 type User struct {
 	id       string
 	Email    string
@@ -33,40 +35,58 @@ func CheckPasswordHash(password, hash string) bool {
 	return err == nil
 }
 
- func init() {
-    var err error
-	ctx , cancel := context.WithTimeout(context.Background(), 10*time.Second)
+func init() {
+	var err error
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	client, err = mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
 	if err != nil {
 		log.Fatal(err)
 	}
- }
+}
 
 func addUser(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	collection := client.Database("appointy").Collection("users")
+	UserCollection = client.Database("appointy").Collection("users")
 	u1 := User{
 		id:       uuid.New().String(),
 		Email:    r.Form["email"][0],
 		Password: r.Form["password"][0],
 	}
-	// json_data, err := json.Marshal(u1)
-	// if(err != nil){
-	//        panic(err)
-	// }
-	fmt.Println(u1)
-	fmt.Println("\n break Line")
-	res, err := collection.InsertOne(ctx, bson.M{
+	hash, err := HashPassword(u1.Password)
+	if err != nil {
+		fmt.Println(err)
+	}
+	res, err := UserCollection.InsertOne(ctx, bson.M{
 		"id":       u1.id,
 		"email":    u1.Email,
-		"password": u1.Password,
+		"password": hash,
 	})
 	if err != nil {
 		panic(err)
 	}
 	id := res.InsertedID
 	fmt.Println(id)
+}
+func authentication(w http.ResponseWriter, r *http.Request) {
+	UserCollection = client.Database("appointy").Collection("users")
+	fmt.Println("method:", r.Method)
+	if r.Method == "POST" {
+		r.ParseForm()
+		u1 := User{
+			Email:    r.Form["email"][0],
+			Password: r.Form["password"][0],
+		}
+		var result User
+		err := UserCollection.FindOne(context.TODO(), bson.M{"email" : u1.Email,}).Decode(&result)
+		if err != nil {
+			log.Fatal(err)
+		}
+        fmt.Println("result Passwords " , result.Password)
+        fmt.Println("User Passwords " , u1.Password)
+		value :=CheckPasswordHash(u1.Password, result.Password)
+        fmt.Println("value " , value)
+	}
 }
 func sayhelloName(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
@@ -84,6 +104,7 @@ func sayhelloName(w http.ResponseWriter, r *http.Request) {
 func main() {
 	http.HandleFunc("/", sayhelloName) // set router
 	http.HandleFunc("/login", addUser)
+	http.HandleFunc("/auth", authentication)
 	err := http.ListenAndServe(":8080", nil) // set listen port
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
