@@ -2,8 +2,7 @@ package user
 
 import (
 	"context"
-	"fmt"
-	"log"
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -39,7 +38,10 @@ func AddUser(w http.ResponseWriter, r *http.Request) {
 		}
 		hash, err := auth.HashPassword(user.Password)
 		if (err!=nil) {
-			fmt.Fprintf(w, "Unable to hash password. \n%s", err)
+w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(bson.M{"message": "Unable to hash password"})
+			return 
 		}
 		result, err := collection.InsertOne(ctx, bson.M{
 			"id": 		user.id,
@@ -50,14 +52,19 @@ func AddUser(w http.ResponseWriter, r *http.Request) {
 		})
 		if (err!=nil) {
 			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusInternalServerError)
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(bson.M{"message": "Unable to insert database"})
+			return
 		}
-
-		fmt.Fprintf(w, "Inserted a single user document: %v\n", result.InsertedID)
-		fmt.Fprintf(w, "User UUID: %v\n", user.id)
-
-		log.Printf("Write Data Successfully")
-	}else {
-		fmt.Fprintf(w, "Invalid Request")
-	}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(bson.M{
+			"message" : "User added successfully",
+			"result" : result,
+		})
+} else {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusNotFound)
+	json.NewEncoder(w).Encode(bson.M{"message": "Invalid request method"})
+}
 }
