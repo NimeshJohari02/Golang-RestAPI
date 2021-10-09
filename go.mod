@@ -1,4 +1,4 @@
-module nimeshjohari02.com/appointyapi
+module nimeshjohari02.com/restapi
 
 go 1.17
 

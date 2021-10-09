@@ -11,7 +11,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo/gridfs"
-	database "nimeshjohari02.com/appointyapi/database"
+	database "nimeshjohari02.com/restapi/database"
 )
 
 func UploadFile(file, filename string) int {
@@ -22,7 +22,7 @@ func UploadFile(file, filename string) int {
 	}
 	conn := database.InitiateMongoClient()
 	bucket, err := gridfs.NewBucket(
-		conn.Database("appointy"),
+		conn.Database("rest"),
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -48,7 +48,7 @@ func UploadFile(file, filename string) int {
 func DownloadFile(fileName string) {
 	conn := database.InitiateMongoClient()
 
-	db := conn.Database("appointy")
+	db := conn.Database("rest")
 	fsFiles := db.Collection("fs.files")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

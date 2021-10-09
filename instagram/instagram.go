@@ -9,8 +9,8 @@ import (
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/bson"
-	database "nimeshjohari02.com/appointyapi/database"
-	filehandler "nimeshjohari02.com/appointyapi/filehandler"
+	database "nimeshjohari02.com/restapi/database"
+	filehandler "nimeshjohari02.com/restapi/filehandler"
 )
 
 type article struct {
@@ -24,7 +24,7 @@ type article struct {
 
  func addInstaPost(w http.ResponseWriter, r *http.Request) {
 	conn := database.InitiateMongoClient()
-	db := conn.Database("appointy")
+	db := conn.Database("rest")
 	collection := db.Collection("InstaPost")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
